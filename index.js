@@ -1,3 +1,8 @@
+const fs = require('fs');
+const Circle = require('./lib/Circle');
+const Triangle = require('./lib/Triangle');
+const Square = require('./lib/Square');
+
 async function promptUser() {
     // Dynamically import inquirer just before use
     const inquirer = await import('inquirer');
