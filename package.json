@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "inquirer": "^9.2.18"
+  },
+  "name": "copilot-logo-maker",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "scripts": {
+    "test": "jest"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
