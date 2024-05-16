@@ -1,50 +1,72 @@
-const fs = require('fs');
-const Circle = require('./lib/Circle');
-const Triangle = require('./lib/Triangle');
-const Square = require('./lib/Square');
+import('inquirer').then(inquirer => {
+    const SvgGenerator = require('./lib/SvgGenerator');
 
-async function promptUser() {
-    // Dynamically import inquirer just before use
-    const inquirer = await import('inquirer');
+    async function promptUser() {
+        let createMore = true;
+        let logoCounter = 1;
 
-    const answers = await inquirer.default.prompt([
-        {
-            type: 'input',
-            name: 'text',
-            message: 'Enter up to three characters for the logo:',
-            validate: input => input.length <= 3 ? true : 'Maximum of three characters allowed.'
-        },
-        {
-            type: 'list',
-            name: 'shape',
-            message: 'Choose a shape:',
-            choices: ['Circle', 'Triangle', 'Square']
-        },
-        {
-            type: 'input',
-            name: 'shapeColor',
-            message: 'Enter the shape color (name or hex):'
-        },
-        {
-            type: 'input',
-            name: 'textColor',
-            message: 'Enter the text color (name or hex):'
+        while (createMore) {
+            const answers = await inquirer.default.prompt([
+                {
+                    type: 'input',
+                    name: 'text',
+                    message: 'Enter up to three characters for the logo:',
+                    validate: input => input.length <= 3 ? true : 'Maximum of three characters allowed.'
+                },
+                {
+                    type: 'list',
+                    name: 'shape',
+                    message: 'Choose a shape:',
+                    choices: ['Circle', 'Triangle', 'Square']
+                },
+                {
+                    type: 'input',
+                    name: 'shapeColor',
+                    message: 'Enter the shape color (name or hex):'
+                },
+                {
+                    type: 'input',
+                    name: 'textColor',
+                    message: 'Enter the text color (name or hex):'
+                },
+                {
+                    type: 'confirm',
+                    name: 'customFilename',
+                    message: 'Do you want to provide a custom filename?',
+                    default: false
+                },
+                {
+                    type: 'input',
+                    name: 'filename',
+                    message: 'Enter the filename for the logo (without extension):',
+                    when: (answers) => answers.customFilename,
+                    validate: input => input ? true : 'Filename cannot be empty.'
+                }
+            ]);
+
+            let filename;
+            if (answers.customFilename) {
+                filename = `${answers.filename}.svg`;
+            } else {
+                filename = `logo${logoCounter > 1 ? logoCounter : ''}.svg`;
+            }
+
+            const generator = new SvgGenerator(answers.text, answers.textColor, answers.shape, answers.shapeColor);
+            generator.saveToFile(filename);
+            logoCounter++;
+
+            const { createAnother } = await inquirer.default.prompt([
+                {
+                    type: 'confirm',
+                    name: 'createAnother',
+                    message: 'Do you want to create another logo?',
+                    default: false
+                }
+            ]);
+
+            createMore = createAnother;
         }
-    ]);
+    }
 
-    const shape = new {
-        'Circle': Circle,
-        'Triangle': Triangle,
-        'Square': Square
-    }[answers.shape](answers.shapeColor);
-
-    const svgContent = `<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
-        ${shape.render()}
-        <text x="150" y="115" font-family="Arial" font-size="20" fill="${answers.textColor}" text-anchor="middle" alignment-baseline="middle">${answers.text}</text>
-    </svg>`;
-
-    fs.writeFileSync('logo.svg', svgContent);
-    console.log('Generated logo.svg');
-}
-
-promptUser();
+    promptUser();
+}).catch(err => console.error(err));
